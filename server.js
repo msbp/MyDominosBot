@@ -57,6 +57,16 @@ var placeOrder = function(){
       quantity: 1
     }));
 
+    // Validate Order
+    order.validate(function(result){
+      console.log("Validating order...: " + result);
+      console.log(result); //Debug this object
+    });
+    order.price(function (result){
+      console.log("Calculating price...: " + result);
+      console.log(result); //Debug this object
+    });
+
   }, 5000);
 }
 
