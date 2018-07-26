@@ -17,33 +17,44 @@ var getStoreID = function(){
   );
 }
 
+// Method used to retrieve and output the store menu to console
 var getMenu = function(){
   myStore.getFriendlyNames(function(storeData){
-    console.log(storeData);
+    console.log(storeData.result);
   });
 }
 
 var placeOrder = function(){
   getStoreID();
-  var fullAddress = new Address(data.address);
+  var fullAddress = new pizzapi.Address(data.address);
   // Timeout allows variable to be retrieved
   setTimeout(function(){
     myStore = new pizzapi.Store(0);
     myStore.ID = storeID;
     //console.log("storeID: " + myStore.ID + " and variable:"+storeID);
     // Creating Customer
-    var customer = new Customer({
+    var customer = new pizzapi.Customer({
       address: fullAddress,
       firstName: data.firstName,
       lastName: data.lastName,
       phonenumber: data.phoneNumber,
       email: data.email
     });
-    
-    getMenu();
+
   }, 5000);
 }
 
+// Code used to log the menu to console
+// var testStore = new pizzapi.Store(10053);
+// testStore.ID = 10053;
+// var menu;
+// testStore.getFriendlyNames(function (storeData){
+//   menu = storeData;
+// });
+// setTimeout(function () {
+//   console.log("Output:");
+//   console.log(menu.result);
+// }, 5000);
 
 
 placeOrder();
