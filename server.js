@@ -25,34 +25,25 @@ var getMenu = function(){
 
 var placeOrder = function(){
   getStoreID();
+  var fullAddress = new Address(data.address);
   // Timeout allows variable to be retrieved
   setTimeout(function(){
     myStore = new pizzapi.Store(0);
     myStore.ID = storeID;
     //console.log("storeID: " + myStore.ID + " and variable:"+storeID);
-    // myStore.getInfo(function(storeData){
-    //   console.log(storeData);
-    // });
+    // Creating Customer
+    var customer = new Customer({
+      address: fullAddress,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      phonenumber: data.phoneNumber,
+      email: data.email
+    });
+    
     getMenu();
   }, 5000);
 }
+
+
+
 placeOrder();
-// console.log("HERE: " + storeID);
-//
-// console.log("Running now:");
-// console.log("Address is: " + data.address);
-// console.log("Name is: " + data.name);
-
-
-
-
-// //////////////////////////////////////////////////////////////////////////////
-// pizzapi.Util.findNearbyStores(
-//   "3989 Panther Street, Victoria,BC, V8N3R2",
-//   "Delivery",
-//   function(storeData){
-//     console.log(storeData);
-//     console.log("\n");
-//     console.log(storeData.result.Stores[0]);
-//   }
-// );
