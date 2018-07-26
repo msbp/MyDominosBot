@@ -24,15 +24,17 @@ var getMenu = function(){
   });
 }
 
+// Method used to place order
 var placeOrder = function(){
   getStoreID();
   var fullAddress = new pizzapi.Address(data.address);
+
   // Timeout allows variable to be retrieved
   setTimeout(function(){
     myStore = new pizzapi.Store(0);
     myStore.ID = storeID;
-    //console.log("storeID: " + myStore.ID + " and variable:"+storeID);
-    // Creating Customer
+
+    // Customer object
     var customer = new pizzapi.Customer({
       address: fullAddress,
       firstName: data.firstName,
@@ -40,6 +42,20 @@ var placeOrder = function(){
       phonenumber: data.phoneNumber,
       email: data.email
     });
+
+    // Order object
+    var order = new pizzapi.Order({
+      customer: customer,
+      storeID: myStore.ID,
+      deliveryMethod: data.method
+    });
+
+    // Adding Item object to Order
+    order.addItem(new pizzapi.Item({
+      code: "14SCVEGGIE",
+      options:[],
+      quantity: 1
+    }));
 
   }, 5000);
 }
