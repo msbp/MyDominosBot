@@ -6,6 +6,8 @@ var storeID;
 
 var data = new Config();
 var myStore;
+var order;
+var fullAddress = new pizzapi.Address(data.address);
 
 // Method gets StoreID variable based on nearest store to Configured Address
 var getStoreID = function(){
@@ -25,12 +27,11 @@ var getMenu = function(){
 }
 
 // Method used to place order
-var placeOrder = function(){
-  getStoreID();
-  var fullAddress = new pizzapi.Address(data.address);
+var setUpOrder = function(){
+  // getStoreID();
+  // var fullAddress = new pizzapi.Address(data.address);
 
   // Timeout allows variable to be retrieved
-  setTimeout(function(){
     myStore = new pizzapi.Store(0);
     myStore.ID = storeID;
 
@@ -44,35 +45,71 @@ var placeOrder = function(){
     });
 
     // Order object
-    var order = new pizzapi.Order({
+    order = new pizzapi.Order({
       customer: customer,
       storeID: myStore.ID,
       deliveryMethod: data.method
     });
 
-    // Adding Item object to Order
-    order.addItem(new pizzapi.Item({
-      code: "14SCVEGGIE",
-      options:[],
-      quantity: 1
-    }));
+    // // Adding Item object to Order
+    // order.addItem(new pizzapi.Item({
+    //   code: "14SCVEGGIE",
+    //   options:[],
+    //   quantity: 1
+    // }));
 
     // Validating Order
-    order.validate(function(result){
-      if (result.success == true){
-        console.log("--- Order has been validated ---");
-        return;
-      }
-      console.log("--- Order failed to be validated ---");
-      // console.log(result);
-    });
-    // Calculating price
-    order.price(function (result){
-      console.log("Calculating price...: " + result.result.Order.Amounts.Payment);
-      // console.log(result);
-    });
+    // order.validate(function(result){
+    //   if (result.success == true){
+    //     console.log("--- Order has been validated ---");
+    //     return;
+    //   }
+    //   console.log("--- Order failed to be validated ---");
+    //   // console.log(result);
+    // });
+    // // Calculating price
+    // order.price(function (result){
+    //   console.log("Calculating price...: " + result.result.Order.Amounts.Payment);
+    //   // console.log(result);
+    // });
 
-  }, 5000);
+}
+
+var addItemToOrder = function (code){
+  if (typeof order === "undefined"){
+    console.log("--- There was an error. The order object has not been initialized yet. ---");
+    return;
+  }
+  order.addItem(new pizzapi.Item({
+    code: code,
+    options: [],
+    quantity: 1
+  }));
+}
+
+var validateOrder = function(){
+  if (typeof order === "undefined"){
+    console.log("--- There was an error. The order object has not been initialized yet. ---");
+    return;
+  }
+  order.validate(function(result){
+    if (result.success == true){
+      console.log("--- Order has been validated ---");
+      return;
+    }
+    console.log("--- Order failed to be validated ---");
+  });
+}
+
+var priceOrder = function(){
+  if (typeof order === "undefined"){
+    console.log("--- There was an error. The order object has not been initialized yet. ---");
+    return;
+  }
+  order.price(function (result){
+    console.log("Calculating price...: " + result.result.Order.Amounts.Payment);
+    // console.log(result);
+  });
 }
 
 // Code used to log the menu to console
@@ -87,5 +124,11 @@ var placeOrder = function(){
 //   console.log(menu.result);
 // }, 5000);
 
-
-placeOrder();
+getStoreID();
+setTimeout(function(){
+  setUpOrder();
+  addItemToOrder("14SCVEGGIE");
+  addItemToOrder("14SCVEGGIE");
+  validateOrder();
+  priceOrder();
+}, 5000);
