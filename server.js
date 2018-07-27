@@ -57,14 +57,19 @@ var placeOrder = function(){
       quantity: 1
     }));
 
-    // Validate Order
+    // Validating Order
     order.validate(function(result){
-      console.log("Validating order...: " + result);
-      console.log(result); //Debug this object
+      if (result.success == true){
+        console.log("--- Order has been validated ---");
+        return;
+      }
+      console.log("--- Order failed to be validated ---");
+      // console.log(result);
     });
+    // Calculating price
     order.price(function (result){
-      console.log("Calculating price...: " + result);
-      console.log(result); //Debug this object
+      console.log("Calculating price...: " + result.result.Order.Amounts.Payment);
+      // console.log(result);
     });
 
   }, 5000);
