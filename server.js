@@ -28,51 +28,24 @@ var getMenu = function(){
 
 // Method used to place order
 var setUpOrder = function(){
-  // getStoreID();
-  // var fullAddress = new pizzapi.Address(data.address);
+  myStore = new pizzapi.Store(0);
+  myStore.ID = storeID;
 
-  // Timeout allows variable to be retrieved
-    myStore = new pizzapi.Store(0);
-    myStore.ID = storeID;
+  // Customer object
+  var customer = new pizzapi.Customer({
+    address: fullAddress,
+    firstName: data.firstName,
+    lastName: data.lastName,
+    phonenumber: data.phoneNumber,
+    email: data.email
+  });
 
-    // Customer object
-    var customer = new pizzapi.Customer({
-      address: fullAddress,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      phonenumber: data.phoneNumber,
-      email: data.email
-    });
-
-    // Order object
-    order = new pizzapi.Order({
-      customer: customer,
-      storeID: myStore.ID,
-      deliveryMethod: data.method
-    });
-
-    // // Adding Item object to Order
-    // order.addItem(new pizzapi.Item({
-    //   code: "14SCVEGGIE",
-    //   options:[],
-    //   quantity: 1
-    // }));
-
-    // Validating Order
-    // order.validate(function(result){
-    //   if (result.success == true){
-    //     console.log("--- Order has been validated ---");
-    //     return;
-    //   }
-    //   console.log("--- Order failed to be validated ---");
-    //   // console.log(result);
-    // });
-    // // Calculating price
-    // order.price(function (result){
-    //   console.log("Calculating price...: " + result.result.Order.Amounts.Payment);
-    //   // console.log(result);
-    // });
-
+  // Order object
+  order = new pizzapi.Order({
+    customer: customer,
+    storeID: myStore.ID,
+    deliveryMethod: data.method
+  });
 }
 
 var addItemToOrder = function (code){
