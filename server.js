@@ -2,15 +2,19 @@
 var Config = require("./Config");
 var pizzapi = require("pizzapi");
 var express = require("express");
+var AssistantV1 = require("watson-developer-cloud/assistant/v1");
+var twilio = require("twilio");
 
 var app = express();
+// Used to keep track of users for interacting with Watson
+var contexts = [];
 
 var storeID;
 var data = new Config();
 var myStore;
 var order;
 var fullAddress = new pizzapi.Address(data.address);
-
+var client = new twilio(data.SID, data.token);
 // Method gets StoreID variable based on nearest store and calls the method
 // responsible for setting up the order. It also validates the order.
 var createOrder = function(){
@@ -98,6 +102,84 @@ app.get("/", function(req, res){
   console.log("* The main page has been loaded by a client.");
 });
 
+// Handles sms from twillio
+app.get("/sendsms", function(req, res){
+  var message = req.query.Body;
+  var number = req.query.From;
+  var twilioNumber = req.query.To;
+
+  var context = null;
+  var index = 0;
+  var contextIndex = 0;
+  contexts.forEach(function (value){
+    console.log(value.from);
+    if (value.from == number){
+      context = value.context;
+      contextIndex = index;
+    }
+    index++;
+  });
+  console.log("Received a message from " + number + " saying \"" + message + "\"");
+
+  var assistant = new AssistantV1({
+    username: data.username,
+    password: data.password,
+    url: "https://gateway.watsonplatform.net/assistant/api",
+    version: "2018-02-16"
+  });
+
+  assistant.message({
+    workspace_id: "c1855dd8-10c9-43cf-88f7-a7de4f866303",
+    input: {"text": message},
+    context: context
+  }, function(err, response){
+    if (err){
+      console.error("There was an error with Watson: " + err);
+    } else {
+      // Iterating through the outputs
+      response.output.text.forEach(function(value){
+        console.log(value);
+        // Sending output message to user using twilio
+        client.messages.create({
+          from: twilioNumber,
+          to: number,
+          body: value
+        }, function(err, message){
+          if (err){
+            console.error("There was an error with Twilio: " + error);
+          }
+        });
+      });
+
+      // Setting/Updating context
+      if (context == null){
+        contexts.push({"from": number, "context":response.context});
+      } else {
+        contexts[contextIndex].context = response.context;
+      }
+      // Setting/Updating entities values
+      if (response.entities.length > 0){
+        response.entities.forEach(function (value){
+          contexts[contextIndex][value.entity] = value.value;
+          console.log(contexts[contextIndex]);
+        });
+      }
+
+      // This will check for when the user is done interacting with Watson.
+      // Also cases where the order is cancelled. Still need to create an intent
+      // for that case.
+      // var entities = response.intents[0].intent;
+      // console.log(intent);
+      // // Delete context when watson is finished the conversation
+      // if (intent == "done"){
+      //   contexts.splice(contextIndex, 1);
+      // }
+
+      res.send("");
+    }
+  });
+
+});
 
 // Initializing the server
 var PORT = 5000;
@@ -105,24 +187,23 @@ app.listen(PORT, function(){
   console.log("Listening on port %d", PORT);
 });
 // Called after the server is initialized
-createOrder();
+// createOrder();
 
+// NOTES
+//  What size pizza would you like?
+//  What kind of pizza would you like? Veggie, Cheese, Pepperoni
+//  Would you like anything else?
+//  Is this for Delivery/Carryout?
+//  Do you have any coupons?
+// END NOTES
 
 // addItemToOrder("14SCVEGGIE");
 // priceOrder();
 // addItemToOrder("14SCVEGGIE");
 // validateOrder();
 // priceOrder();
-// WE WILL GET RID OF THE TIME OUT. ORDER WILL BE INITIALIZED WHEN THE SERVER IS INITIALIZED.
-// DIFFERENT ROUTES WILL HANDLE DIFFERENT METHODS. ONCE THEY ARE CALLED THE ORDER OBJECT
-// WILL HAVE BEEN PREVIOUSLY SET UP.
-// // Created timer to allow program to fetch store ID from API before intializing the store variable
-// setTimeout(function(){
-//   setUpOrder();
-//   addItemToOrder("14SCVEGGIE");
-//   addItemToOrder("14SCVEGGIE");
-//   validateOrder();
-//   priceOrder();
+
+
 // // console.log("NEW SECTION:");
 // // var cardNumber = '4100123422343234';
 // //
