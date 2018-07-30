@@ -146,7 +146,7 @@ app.get("/sendsms", function(req, res){
           body: value
         }, function(err, message){
           if (err){
-            console.error("There was an error with Twilio: " + error);
+            console.error("There was an error with Twilio: " + err);
           }
         });
       });
